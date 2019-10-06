@@ -1,0 +1,16 @@
+description: >
+  "Notify the Rollbar that the project has been successfully deployed."
+
+usage:
+  version: 2.1
+
+  orbs:
+    rollbar: lex111/rollbar@1.0.0
+
+  jobs:
+    build:
+      docker:
+        - image: <docker image>
+      steps:
+        - rollbar/notify:
+            project_environment: "This is Rollbar environment" # Optional: Enter your own message

@@ -1,0 +1,17 @@
+description: >
+  A job to notify Rollbar the project has been deployed.
+  A Rollbar access token is required to be set in the
+  environment with the name `ROLLBAR_ACCESS_TOKEN`.
+
+parameters:
+  project_environment:
+    type: string
+    default: "production"
+    description: "The Rollbar environment. Defaults to production."
+
+docker:
+  - image: circleci/buildpack-deps:18.04-scm
+
+steps:
+  - notify-deploy:
+      project_environment: << parameters.project_environment >>
