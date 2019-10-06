@@ -1,0 +1,32 @@
+# How to author commands: https://circleci.com/docs/2.0/reusing-config/#authoring-reusable-commands
+description: >
+  A command to notify Rollbar the project has been deployed.
+  A Rollbar access token is required to be set in the
+  environment with the name `ROLLBAR_ACCESS_TOKEN`.
+  Add this as the last step of your the job that you
+  use to deploy.
+
+parameters:
+  project_environment:
+    type: string
+    default: "production"
+    description: "The Rollbar environment. Defaults to production."
+
+steps:
+  - run:
+      name: Provide error if non-bash shell
+      command: |
+        if [ ! -x /bin/bash ]; then
+          echo Bash not installed.
+          exit 1
+        fi
+
+  - run:
+      name: Notify Rollbar
+      shell: /bin/bash
+      command: |
+        curl https://api.rollbar.com/api/1/deploy/ \
+          --form access_token=$ROLLBAR_ACCESS_TOKEN \
+          --form environment=<< parameters.project_environment >> \
+          --form revision=$CIRCLE_SHA1 \
+          --form local_username=$CIRCLE_USERNAME

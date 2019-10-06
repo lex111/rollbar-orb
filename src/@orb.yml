@@ -1,9 +1,5 @@
 version: 2.1
 
 description: >
-  Sample orb description
-  # What will your orb allow users to do?
-  # Descriptions should be short, simple, and clear.
-
-orbs:
-  hello: circleci/hello-build@0.0.5 # Sample imported orb
+  A set of commands and jobs for working with the Rollbar API. Source:
+  https://github.com/lex111/rollbar-orb/

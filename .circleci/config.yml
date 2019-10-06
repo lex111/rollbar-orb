@@ -1,0 +1,74 @@
+version: 2.1
+
+orbs:
+  orb-tools: circleci/orb-tools@8
+
+references:
+  orb-name: &orb-name lex111/rollbar-orb
+  ssh-fingerprints: &ssh-fingerprints 4f:62:30:29:28:1f:65:16:fc:a7:a3:c9:f9:13:74:4e
+
+workflows:
+  lint_pack-validate_publish-dev:
+    jobs:
+      - orb-tools/lint
+
+      - orb-tools/pack:
+          requires:
+            - orb-tools/lint
+
+      - orb-tools/publish-dev:
+          orb-name: *orb-name
+          requires:
+            - orb-tools/pack
+
+      - orb-tools/trigger-integration-workflow:
+          name: trigger-integration-dev
+          ssh-fingerprints: *ssh-fingerprints
+          cleanup-tags: true
+          requires:
+            - orb-tools/publish-dev
+          filters:
+            branches:
+              ignore: master
+
+      - orb-tools/trigger-integration-workflow:
+          name: trigger-integration-master
+          ssh-fingerprints: *ssh-fingerprints
+          cleanup-tags: true
+          tag: master
+          requires:
+            - orb-tools/publish-dev
+          filters:
+            branches:
+              only: master
+
+  integration-tests_prod-release:
+    jobs:
+      - orb-tools/dev-promote-prod:
+          orb-name: *orb-name
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /master-patch.*/
+          name: dev-promote-patch
+
+      - orb-tools/dev-promote-prod:
+          name: dev-promote-minor
+          orb-name: *orb-name
+          release: minor
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /master-minor.*/
+
+      - orb-tools/dev-promote-prod:
+          name: dev-promote-major
+          orb-name: *orb-name
+          release: major
+          filters:
+            branches:
+              ignore: /.*/
+            tags:
+              only: /master-major.*/
